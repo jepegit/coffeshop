@@ -1,7 +1,7 @@
 # coffeshop
 Tips and tricks for battery researchers at IFE
 
-By
+## By
 Jan Petter
 Vilde
 Embla
