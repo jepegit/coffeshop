@@ -1,5 +1,5 @@
 #
-# This will eventually solve the BV equation
+# This solves and plots the BV equation
 #
 import matplotlib.pyplot as plt
 import numpy as np
