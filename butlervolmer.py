@@ -1,5 +1,5 @@
 #
-# This will eventually solve the BV equation
+# This solves and plots the BV equation
 #
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,6 +21,6 @@ plt.plot(eta,ja)
 plt.plot(eta,jn)
 plt.plot(eta,j)
 plt.xlabel('Overpotential [V]')
-plt.ylabel('Current Density [A/m2]')
-plt.legend(['ja', 'jn', 'j'], loc='upper left')
+plt.ylabel('Current Density [A/m$^2$]')
+plt.legend(['$j_a$', '$j_n$', '$j$'], loc='upper left')
 plt.show()
