@@ -58,30 +58,17 @@ Dens= CB*rho_CB+Bind*rho_dead+Siut*rho_si+Gr*rho_graphite
 
 Vv=Mass/Dens          #volume electrode material
 Porosity=(Vt-Vv)/Vt
-#print(Dens)
-#print(Vv)
-#print(Porosity)
 ### reference Theoretical Limits of Energy Density in Silicon-Carbon Composite Anode Based Lithium Ion Batteries
-
 wsi = 0.05 # weight % Si
 wc  = 0.9 # weight % Carbon
 wb  = 0.05 # weight % binder
 wcc  = 0 # weight % carbon black /conductive carbon
-
 ssi=3600
 sc=330
-
 psi= 2.3 # density g/cc
 pc= 2.24
 pb=1.1
 pcc=2
-
-#x+wc+wb+wcc=1
-
-
-
-
-
 
 
 vsi1=(wsi/psi)/((wsi/psi)+(wc/pc)+(wb/pb)+(wcc/pcc)) #volume fraction Si ?
@@ -95,20 +82,16 @@ Ga=((wsi*ssi)+(sc*wc))/100 #gravimetric energy density anode mAh/g
 #Va=Pa*Ga                   #volumetric capacity
 Va=(100 -(((vsi1*280)+(vc1*10))/100)+PAL )/((wsi/psi)+(wc/pc)+(wb/pb)+(wcc/pcc))*(((wsi*ssi)+(sc*wc))/100 )
 def f2(x):
-    #wc = 1 - wb - wcc - x
-    #wb = 1 - wc - wcc - x
-    #wcc = 1 - wc - wb - x
     vsi = (x/ psi) / ((x / psi) + (wc / pc) + (wb / pb) + (wcc / pcc))  # volume fraction Si ?
     vc = (wc / pc) / ((x / psi) + (wc / pc) + (wb / pb) + (wcc / pcc))  # volume fraction C ?
     res = (100 -(((vsi*280)+(vc*10))/100)+PAL)/((x/psi)+(wc/pc)+(wb/pb)+(wcc/pcc))*(((x*ssi)+(sc*wc))/100 )
 
-    #kladd
-    #m=(x+wc)*Mass #mass input value
-    dens=(x* psi) + ((1-x-wb) * pc) + (wb * pb) + (wcc * pcc) # density g/ccc
-    PA1 = ((Vt)-((Mass/dens)*280*x))/((Vt))
-    Grav =((x*ssi)+(sc*wc))/100    #
-    Por= (((vsi*280)+(vc*10))/100)+PAL
-    Pa1 = (100 - PA1) / ((wsi / psi) + (wc / pc) + (wb / pb) + (wcc / pcc))
+    ##
+    # dens=(x* psi) + ((1-x-wb) * pc) + (wb * pb) + (wcc * pcc) # density g/ccc
+    #PA1 = ((Vt)-((Mass/dens)*280*x))/((Vt))
+   # Grav =((x*ssi)+(sc*wc))/100    #
+   # Por= (((vsi*280)+(vc*10))/100)+PAL
+    #Pa1 = (100 - PA1) / ((wsi / psi) + (wc / pc) + (wb / pb) + (wcc / pcc))
     #res = ((100-((x*2.8)+((100-wb-wc-x)*0.1)+PAL))*((x*36)+((100-wb-wcc-x)*3.3)))/((x/2.3)+((100-wb-wc-x)/2.24)+(wb/pb)+(wc/pc)) # paper retracted, used weight fraction, not volume fraction in eq for PA
 
 
@@ -144,14 +127,15 @@ for xi in x:  # x=L
 
 import matplotlib.pyplot as plt
 
-plt.figure(3)
+plt.subplot(2, 1, 1)
+#plt.figure(3)
 plt.plot(x, y3, 'bx')
 plt.title(['Volumetric capacity', RSi * 100])
 plt.xlabel('Si wt %')
 plt.ylabel('Volumetric capacity')
 
-
-plt.figure(4)
+plt.subplot(2, 1, 2)
+#plt.figure(4)
 plt.plot(x, y4, 'bx')
 plt.title(['Porosity/Loading', RSi * 100])
 plt.xlabel('Loading [mg/cm2]')
