@@ -5,7 +5,7 @@ Created on Mon Mar 23 10:10:12 2020
 @author: carlf
 """
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -94,7 +94,6 @@ def f2(x):
     #Pa1 = (100 - PA1) / ((wsi / psi) + (wc / pc) + (wb / pb) + (wcc / pcc))
     #res = ((100-((x*2.8)+((100-wb-wc-x)*0.1)+PAL))*((x*36)+((100-wb-wcc-x)*3.3)))/((x/2.3)+((100-wb-wc-x)/2.24)+(wb/pb)+(wc/pc)) # paper retracted, used weight fraction, not volume fraction in eq for PA
 
-
     return res
 
 
@@ -130,14 +129,14 @@ import matplotlib.pyplot as plt
 plt.subplot(2, 1, 1)
 #plt.figure(3)
 plt.plot(x, y3, 'bx')
-plt.title(['Volumetric capacity', RSi * 100])
+plt.title(['Volumetric capacity'])
 plt.xlabel('Si wt %')
 plt.ylabel('Volumetric capacity')
 
 plt.subplot(2, 1, 2)
 #plt.figure(4)
 plt.plot(x, y4, 'bx')
-plt.title(['Porosity/Loading', RSi * 100])
+plt.title(['Porosity/Loading'])
 plt.xlabel('Loading [mg/cm2]')
 plt.ylabel('Porosity')
 plt.show()
