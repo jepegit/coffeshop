@@ -111,12 +111,6 @@ class Tester:
         self.ax[1, 1].legend()
         
 
-        
-#    def plotResult(self, )
-        
-
-
-
 
 class Schedule:
     def __init__(self):
@@ -169,29 +163,6 @@ class Schedule:
                         
             goTo = currentStep.execute(cell)
                 
-        
-            
-#        self.activeStep = self.steps[0]
-#            
-#    def getActiveStep(self):
-#        return self.activeStep
-    
-#    def checkLimits(self, currentstate):
-#        isTriggered, goTo = self.activeStep.checkLimits(currentstate)
-#
-#        if goTo == "Next Step" or (not isTriggered and self.activeStep.stepType == "Set Variable(s)"):
-#            if len(self.steps) <= self.steps.index(self.activeStep) + 1:
-#                return False
-#            else:
-#                self.activeStep = self.steps[self.steps.index(self.activeStep)+1]
-#            
-#        elif isTriggered:
-#            for step in self.steps:
-#                if step.stepName == goTo:
-#                    self.activeStep = step
-#
-#        return True
-        
 
 class Step:
     def __init__(self, stepInfo):
