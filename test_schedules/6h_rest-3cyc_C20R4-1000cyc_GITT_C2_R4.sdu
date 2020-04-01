@@ -1,7 +1,7 @@
 [Version Section]
 Current_Version=Schedule Version 7.00.12
 [Signature Section]
-Signature={156C723C-5467-4376-B4DB-F9AE5153689B}
+Signature={C95E8D78-E5B0-482D-85EC-5841B0C6EFFE}
 [Schedule]
 m_uMUID=660851408
 m_szCreator=
@@ -14,13 +14,13 @@ m_bLogChanAuxData=0
 m_bLogSBData=0
 m_bLogCANBMSData=0
 m_bCheckCurrentSafety=1
-m_bDefaultCurrentSafetyMode=1
+m_bDefaultCurrentSafetyMode=0
 m_uDefaultCurrentSafetyScopePercent=105
-m_CurrentSafetyScope=0.000000^0.000000
+m_CurrentSafetyScope=-0.080000^0.080000
 m_bCheckVoltageSafety=1
-m_bDefaultVoltageSafetyMode=1
+m_bDefaultVoltageSafetyMode=0
 m_uDefaultVoltageSafetyScopePercent=105
-m_VoltageSafetyScope=0.000000^0.000000
+m_VoltageSafetyScope=0.000000^5.000000
 m_bCheckPowerSafety=0
 m_PowerSafetyScope=0.000000^0.000000
 m_AuxSafetyEnabled=0^0 ; 1^0 ; 2^0 ; 3^0 ; 4^0 ; 5^0 ; 6^0 ; 7^0 ; 8^0 ; 9^0 ; 10^0 ; 11^0
@@ -30,21 +30,21 @@ m_AuxPresSafetyScope=0.000000^0.000000
 m_AuxPHSafetyScope=0.000000^0.000000
 m_AuxFlowrateSafetyScope=0.000000^0.000000
 m_AuxDensitySafetyScope=0.000000^0.000000
-m_uStepNum=18
-m_uFormulaNum=0
+m_uStepNum=20
+m_uFormulaNum=2
 m_uPulseNum=0
 m_uCVNum=0
 m_uAddInNum=0
 m_iAppCategory=0
 m_szOriginalInfo=ÿþMITS PRO VERSION: 7.00 Build: 170606USBÿþÿþMITS PRO INSTALLATION PATH: C:\ArbinSoftware\MITS_PRO\ÿþFREE HARD DISK SPACE IN "C" DRIVE: 411724 MBÿþÿþTOTAL PHYSICAL MEMORY: 4096 MBÿþAVAILABLE PHYSICAL MEMORY: 4096 MBÿþÿþOPERATING SYSTEM: Windows 7, Build 7601, Service Pack 1ÿþCOMPUTER NAME: ARBIN4ÿþUSER NAME: ArbinÿþÿþDAO SYSTEM: Microsoft Access 2000/2002(XP) or DAO 3.6ÿþÿþCUSTOMER ID: IFE Institute for Energy TechnologyÿþSERIAL NUMBER: 202703ÿþDRIVER ID: 92592582ÿþÿþSYSTEM CONFIG FILE VERSION: System Config Version 7.00.09ÿþBATCH FILE VERSION: Batch Version 7.00.02ÿþSCHEDULE FILE VERSION: Schedule Version 7.00.10ÿþRESULTS FILE VERSION: Results File 1.0ÿþÿþFILE NAME: C:\ArbinSoftware\MITS_PRO\Work\Elkem Carbon\Standard_1000cyc_C20.sduÿþFILE CREATION TIME: 2017-07-14 14:00 (PM)ÿþÿþ
-m_fSdlFactor_I=0
-m_fSdlFactor_V=0
+m_fSdlFactor_I=0.1
+m_fSdlFactor_V=0.1
 m_fSdlFactor_Capacity=1
 m_fSdlFactor_Energy=1
 m_fSdlFactor_Time=60
 m_fMinDtCurrent=1
 m_fMinDtVoltage=1
-m_fSdlFactor_AuxV=0
+m_fSdlFactor_AuxV=0.001
 m_fSdlFactor_AuxT=1
 m_fSdlFactor_AuxP=0
 m_fSdlFactor_AuxPhValue=0
@@ -59,13 +59,13 @@ m_ImpedanceGoto=0
 m_bSimuExtraLogEnabled=0
 m_bParallelCurrentAbnormalStop=0
 m_bParallelVoltageAbnormalStop=0
-m_fParallelCurrentAbnormalStressHold=0
-m_fParallelVoltageAbnormalStressHold=0
+m_fParallelCurrentAbnormalStressHold=0.5
+m_fParallelVoltageAbnormalStressHold=0.5
 m_fParallelCurrentAbnormalCheckInterval=1
 m_fParallelVoltageAbnormalCheckInterval=5
 m_fIrMax=10
 m_AuxExternalChargeSafetyScope=0.000000^0.000000
-m_fSdlFactor_AuxExternalCharge=0
+m_fSdlFactor_AuxExternalCharge=0.001
 m_bLogChanAuxDxdt=0
 m_AuxSafetyChanSafetyEnabled=0^0 ; 1^0 ; 2^0
 m_AuxSafetyVoltSafetyScope=0.000000^0.000000
@@ -73,7 +73,7 @@ m_AuxSafetyCurrSafetyScope=0.000000^0.000000
 m_AuxSafetyTempSafetyScope=0.000000^0.000000
 m_AuxHumiditySafetyScope=0.000000^0.000000
 m_fSdlFactor_AuxHumidity=10
-m_bNewCreate=1
+m_bNewCreate=0
 [Schedule_Step0]
 m_uLimitNum=3
 m_szLabel=Start OCV 6h
@@ -135,9 +135,9 @@ Equation2_szRight=
 m_uLimitNum=1
 m_szLabel=IR1
 m_szStepCtrlType=Internal Resistance
-m_szCurrentRange=Range3
+m_szCurrentRange=Range4
 m_szVoltageRange=High
-m_szCtrlValue=1e-005
+m_szCtrlValue=0.0001
 m_szExtCtrlValue1=20.00
 m_szExtCtrlValue2=0
 m_szExtDef=
@@ -166,11 +166,11 @@ Equation2_szRight=
 m_uLimitNum=4
 m_szLabel=c20 lith
 m_szStepCtrlType=C-Rate
-m_szCurrentRange=Range3
+m_szCurrentRange=Range4
 m_szVoltageRange=High
 m_szCtrlValue=-0.05
 m_szExtCtrlValue1=
-m_szExtCtrlValue2=0
+m_szExtCtrlValue2=
 m_szExtDef=
 m_uStepCtrlTypeExtFlag=0
 m_szAddIn=
@@ -186,7 +186,7 @@ m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=DV_Voltage
 Equation0_szCompareSign=>=
-Equation0_szRight=0.005
+Equation0_szRight=0.01
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
@@ -233,13 +233,13 @@ Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
 [Schedule_Step3]
-m_uLimitNum=4
-m_szLabel=c50 lith
-m_szStepCtrlType=C-Rate
+m_uLimitNum=1
+m_szLabel=IR Lith
+m_szStepCtrlType=Internal Resistance
 m_szCurrentRange=Range4
 m_szVoltageRange=High
-m_szCtrlValue=-0.02
-m_szExtCtrlValue1=
+m_szCtrlValue=0.0001
+m_szExtCtrlValue1=20.00
 m_szExtCtrlValue2=0
 m_szExtDef=
 m_uStepCtrlTypeExtFlag=0
@@ -251,51 +251,12 @@ m_bSynchronizedStart=0
 m_bAutoPidTips=0
 m_nExtra1=0
 [Schedule_Step3_Limit0]
-m_bStepLimit=0
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=DV_Voltage
-Equation0_szCompareSign=>=
-Equation0_szRight=0.005
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step3_Limit1]
-m_bStepLimit=0
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=DV_Time
-Equation0_szCompareSign=>=
-Equation0_szRight=120
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step3_Limit2]
 m_bStepLimit=1
-m_bLogDataLimit=1
+m_bLogDataLimit=0
 m_szGotoStep=Next Step
 Equation0_szLeft=PV_CHAN_Step_Time
 Equation0_szCompareSign=>=
-Equation0_szRight=1.728e+006
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step3_Limit3]
-m_bStepLimit=1
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=PV_CHAN_Voltage
-Equation0_szCompareSign=<=
-Equation0_szRight=0.05
+Equation0_szRight=60
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
@@ -360,41 +321,10 @@ Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
 [Schedule_Step5]
-m_uLimitNum=1
-m_szLabel=IR Lith
-m_szStepCtrlType=Internal Resistance
-m_szCurrentRange=Range3
-m_szVoltageRange=High
-m_szCtrlValue=0.0001
-m_szExtCtrlValue1=20.00
-m_szExtCtrlValue2=0
-m_szExtDef=
-m_uStepCtrlTypeExtFlag=0
-m_szAddIn=
-m_bSampleClockStretch=0
-m_szUnitType=
-m_szExUnitType1=
-m_bSynchronizedStart=0
-m_bAutoPidTips=0
-m_nExtra1=0
-[Schedule_Step5_Limit0]
-m_bStepLimit=1
-m_bLogDataLimit=0
-m_szGotoStep=Next Step
-Equation0_szLeft=PV_CHAN_Step_Time
-Equation0_szCompareSign=>=
-Equation0_szRight=60
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step6]
 m_uLimitNum=4
 m_szLabel=c20 delith
 m_szStepCtrlType=C-Rate
-m_szCurrentRange=Range3
+m_szCurrentRange=Range4
 m_szVoltageRange=High
 m_szCtrlValue=0.05
 m_szExtCtrlValue1=
@@ -408,20 +338,20 @@ m_szExUnitType1=
 m_bSynchronizedStart=0
 m_bAutoPidTips=0
 m_nExtra1=0
-[Schedule_Step6_Limit0]
+[Schedule_Step5_Limit0]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=DV_Voltage
 Equation0_szCompareSign=>=
-Equation0_szRight=0.005
+Equation0_szRight=0.01
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step6_Limit1]
+[Schedule_Step5_Limit1]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
@@ -434,7 +364,7 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step6_Limit2]
+[Schedule_Step5_Limit2]
 m_bStepLimit=1
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
@@ -447,13 +377,44 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step6_Limit3]
+[Schedule_Step5_Limit3]
 m_bStepLimit=1
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=PV_CHAN_Voltage
 Equation0_szCompareSign=>=
 Equation0_szRight=1
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step6]
+m_uLimitNum=1
+m_szLabel=IR Delith
+m_szStepCtrlType=Internal Resistance
+m_szCurrentRange=Range4
+m_szVoltageRange=High
+m_szCtrlValue=0.0001
+m_szExtCtrlValue1=20.00
+m_szExtCtrlValue2=0
+m_szExtDef=
+m_uStepCtrlTypeExtFlag=0
+m_szAddIn=
+m_bSampleClockStretch=0
+m_szUnitType=
+m_szExUnitType1=
+m_bSynchronizedStart=0
+m_bAutoPidTips=0
+m_nExtra1=0
+[Schedule_Step6_Limit0]
+m_bStepLimit=1
+m_bLogDataLimit=0
+m_szGotoStep=Next Step
+Equation0_szLeft=PV_CHAN_Step_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=60
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
@@ -480,7 +441,7 @@ m_bAutoPidTips=1
 m_nExtra1=0
 [Schedule_Step7_Limit0]
 m_bStepLimit=1
-m_bLogDataLimit=0
+m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=PV_CHAN_Step_Time
 Equation0_szCompareSign=>=
@@ -519,12 +480,12 @@ Equation2_szCompareSign=
 Equation2_szRight=
 [Schedule_Step8]
 m_uLimitNum=1
-m_szLabel=IR Delith
-m_szStepCtrlType=Internal Resistance
-m_szCurrentRange=Range3
+m_szLabel=Loop
+m_szStepCtrlType=Set Variable(s)
+m_szCurrentRange=Range1
 m_szVoltageRange=High
-m_szCtrlValue=0.0001
-m_szExtCtrlValue1=20.00
+m_szCtrlValue=983055
+m_szExtCtrlValue1=1
 m_szExtCtrlValue2=0
 m_szExtDef=
 m_uStepCtrlTypeExtFlag=0
@@ -537,38 +498,7 @@ m_bAutoPidTips=0
 m_nExtra1=0
 [Schedule_Step8_Limit0]
 m_bStepLimit=1
-m_bLogDataLimit=0
-m_szGotoStep=Next Step
-Equation0_szLeft=PV_CHAN_Step_Time
-Equation0_szCompareSign=>=
-Equation0_szRight=60
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step9]
-m_uLimitNum=1
-m_szLabel=Loop
-m_szStepCtrlType=Set Variable(s)
-m_szCurrentRange=Range1
-m_szVoltageRange=High
-m_szCtrlValue=15
-m_szExtCtrlValue1=3
-m_szExtCtrlValue2=0
-m_szExtDef=
-m_uStepCtrlTypeExtFlag=0
-m_szAddIn=
-m_bSampleClockStretch=0
-m_szUnitType=
-m_szExUnitType1=
-m_bSynchronizedStart=0
-m_bAutoPidTips=0
-m_nExtra1=0
-[Schedule_Step9_Limit0]
-m_bStepLimit=1
-m_bLogDataLimit=0
+m_bLogDataLimit=1
 m_szGotoStep=c20 lith
 Equation0_szLeft=PV_CHAN_Cycle_Index
 Equation0_szCompareSign=<=
@@ -579,13 +509,13 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step10]
+[Schedule_Step9]
 m_uLimitNum=4
-m_szLabel=c4 lith
+m_szLabel=lith PULSE GITT
 m_szStepCtrlType=C-Rate
-m_szCurrentRange=Range3
+m_szCurrentRange=Range4
 m_szVoltageRange=High
-m_szCtrlValue=-0.25
+m_szCtrlValue=-0.5
 m_szExtCtrlValue1=
 m_szExtCtrlValue2=0
 m_szExtDef=
@@ -597,49 +527,49 @@ m_szExUnitType1=
 m_bSynchronizedStart=0
 m_bAutoPidTips=0
 m_nExtra1=0
-[Schedule_Step10_Limit0]
+[Schedule_Step9_Limit0]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=DV_Voltage
 Equation0_szCompareSign=>=
-Equation0_szRight=0.005
+Equation0_szRight=0.001
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step10_Limit1]
+[Schedule_Step9_Limit1]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=DV_Time
 Equation0_szCompareSign=>=
-Equation0_szRight=120
+Equation0_szRight=10
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step10_Limit2]
+[Schedule_Step9_Limit2]
 m_bStepLimit=1
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=PV_CHAN_Step_Time
 Equation0_szCompareSign=>=
-Equation0_szRight=1.728e+006
+Equation0_szRight=F_pulse
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step10_Limit3]
+[Schedule_Step9_Limit3]
 m_bStepLimit=1
 m_bLogDataLimit=1
-m_szGotoStep=Next Step
+m_szGotoStep=IR lith GITT
 Equation0_szLeft=PV_CHAN_Voltage
 Equation0_szCompareSign=<=
 Equation0_szRight=0.05
@@ -649,9 +579,9 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step11]
+[Schedule_Step10]
 m_uLimitNum=3
-m_szLabel=OCV c4lith
+m_szLabel=lith PAUSE GITT
 m_szStepCtrlType=Rest
 m_szCurrentRange=Range1
 m_szVoltageRange=High
@@ -667,39 +597,70 @@ m_szExUnitType1=
 m_bSynchronizedStart=0
 m_bAutoPidTips=1
 m_nExtra1=0
-[Schedule_Step11_Limit0]
+[Schedule_Step10_Limit0]
 m_bStepLimit=1
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=PV_CHAN_Step_Time
 Equation0_szCompareSign=>=
-Equation0_szRight=900
+Equation0_szRight=F_pause
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step11_Limit1]
+[Schedule_Step10_Limit1]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=DV_Time
 Equation0_szCompareSign=>=
-Equation0_szRight=30
+Equation0_szRight=10
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step11_Limit2]
+[Schedule_Step10_Limit2]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=DV_Voltage
 Equation0_szCompareSign=>=
-Equation0_szRight=0.005
+Equation0_szRight=0.001
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step11]
+m_uLimitNum=1
+m_szLabel=Loop lith GITT
+m_szStepCtrlType=Set Variable(s)
+m_szCurrentRange=Range1
+m_szVoltageRange=High
+m_szCtrlValue=0
+m_szExtCtrlValue1=0
+m_szExtCtrlValue2=0
+m_szExtDef=
+m_uStepCtrlTypeExtFlag=0
+m_szAddIn=
+m_bSampleClockStretch=0
+m_szUnitType=
+m_szExUnitType1=
+m_bSynchronizedStart=0
+m_bAutoPidTips=0
+m_nExtra1=0
+[Schedule_Step11_Limit0]
+m_bStepLimit=1
+m_bLogDataLimit=0
+m_szGotoStep=lith PULSE GITT
+Equation0_szLeft=PV_CHAN_Step_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=0
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
@@ -708,9 +669,9 @@ Equation2_szCompareSign=
 Equation2_szRight=
 [Schedule_Step12]
 m_uLimitNum=1
-m_szLabel=IR c4lith
+m_szLabel=IR lith GITT
 m_szStepCtrlType=Internal Resistance
-m_szCurrentRange=Range3
+m_szCurrentRange=Range4
 m_szVoltageRange=High
 m_szCtrlValue=0.0001
 m_szExtCtrlValue1=20.00
@@ -738,78 +699,8 @@ Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
 [Schedule_Step13]
-m_uLimitNum=4
-m_szLabel=c4 delith
-m_szStepCtrlType=C-Rate
-m_szCurrentRange=Range3
-m_szVoltageRange=High
-m_szCtrlValue=0.25
-m_szExtCtrlValue1=
-m_szExtCtrlValue2=0
-m_szExtDef=
-m_uStepCtrlTypeExtFlag=0
-m_szAddIn=
-m_bSampleClockStretch=0
-m_szUnitType=
-m_szExUnitType1=
-m_bSynchronizedStart=0
-m_bAutoPidTips=0
-m_nExtra1=0
-[Schedule_Step13_Limit0]
-m_bStepLimit=0
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=DV_Voltage
-Equation0_szCompareSign=>=
-Equation0_szRight=0.005
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step13_Limit1]
-m_bStepLimit=0
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=DV_Time
-Equation0_szCompareSign=>=
-Equation0_szRight=120
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step13_Limit2]
-m_bStepLimit=1
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=PV_CHAN_Step_Time
-Equation0_szCompareSign=>=
-Equation0_szRight=1.728e+006
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step13_Limit3]
-m_bStepLimit=1
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=PV_CHAN_Voltage
-Equation0_szCompareSign=>=
-Equation0_szRight=1
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step14]
 m_uLimitNum=3
-m_szLabel=OCV c4 delith
+m_szLabel=OCV lith GITT
 m_szStepCtrlType=Rest
 m_szCurrentRange=Range1
 m_szVoltageRange=High
@@ -825,9 +716,9 @@ m_szExUnitType1=
 m_bSynchronizedStart=0
 m_bAutoPidTips=1
 m_nExtra1=0
-[Schedule_Step14_Limit0]
+[Schedule_Step13_Limit0]
 m_bStepLimit=1
-m_bLogDataLimit=0
+m_bLogDataLimit=1
 m_szGotoStep=Next Step
 Equation0_szLeft=PV_CHAN_Step_Time
 Equation0_szCompareSign=>=
@@ -838,7 +729,7 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step14_Limit1]
+[Schedule_Step13_Limit1]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
@@ -851,7 +742,7 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step14_Limit2]
+[Schedule_Step13_Limit2]
 m_bStepLimit=0
 m_bLogDataLimit=1
 m_szGotoStep=Next Step
@@ -864,11 +755,169 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
+[Schedule_Step14]
+m_uLimitNum=4
+m_szLabel=delith PULSE GITT
+m_szStepCtrlType=C-Rate
+m_szCurrentRange=Range4
+m_szVoltageRange=High
+m_szCtrlValue=0.5
+m_szExtCtrlValue1=
+m_szExtCtrlValue2=0
+m_szExtDef=
+m_uStepCtrlTypeExtFlag=0
+m_szAddIn=
+m_bSampleClockStretch=0
+m_szUnitType=
+m_szExUnitType1=
+m_bSynchronizedStart=0
+m_bAutoPidTips=0
+m_nExtra1=0
+[Schedule_Step14_Limit0]
+m_bStepLimit=0
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=DV_Voltage
+Equation0_szCompareSign=>=
+Equation0_szRight=0.001
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step14_Limit1]
+m_bStepLimit=0
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=DV_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=10
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step14_Limit2]
+m_bStepLimit=1
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=PV_CHAN_Step_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=F_pulse
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step14_Limit3]
+m_bStepLimit=1
+m_bLogDataLimit=1
+m_szGotoStep=IR delith GITT
+Equation0_szLeft=PV_CHAN_Voltage
+Equation0_szCompareSign=>=
+Equation0_szRight=1
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
 [Schedule_Step15]
+m_uLimitNum=3
+m_szLabel=delith PAUSE GITT
+m_szStepCtrlType=Rest
+m_szCurrentRange=Range1
+m_szVoltageRange=High
+m_szCtrlValue=
+m_szExtCtrlValue1=
+m_szExtCtrlValue2=
+m_szExtDef=
+m_uStepCtrlTypeExtFlag=0
+m_szAddIn=
+m_bSampleClockStretch=0
+m_szUnitType=
+m_szExUnitType1=
+m_bSynchronizedStart=0
+m_bAutoPidTips=1
+m_nExtra1=0
+[Schedule_Step15_Limit0]
+m_bStepLimit=1
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=PV_CHAN_Step_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=F_pause
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step15_Limit1]
+m_bStepLimit=0
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=DV_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=10
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step15_Limit2]
+m_bStepLimit=0
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=DV_Voltage
+Equation0_szCompareSign=>=
+Equation0_szRight=0.001
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step16]
 m_uLimitNum=1
-m_szLabel=IR c4delith
+m_szLabel=Loop delith GITT
+m_szStepCtrlType=Set Variable(s)
+m_szCurrentRange=Range1
+m_szVoltageRange=High
+m_szCtrlValue=0
+m_szExtCtrlValue1=0
+m_szExtCtrlValue2=0
+m_szExtDef=
+m_uStepCtrlTypeExtFlag=0
+m_szAddIn=
+m_bSampleClockStretch=0
+m_szUnitType=
+m_szExUnitType1=
+m_bSynchronizedStart=0
+m_bAutoPidTips=0
+m_nExtra1=0
+[Schedule_Step16_Limit0]
+m_bStepLimit=1
+m_bLogDataLimit=0
+m_szGotoStep=delith PULSE GITT
+Equation0_szLeft=PV_CHAN_Step_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=0
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step17]
+m_uLimitNum=1
+m_szLabel=IR delith GITT
 m_szStepCtrlType=Internal Resistance
-m_szCurrentRange=Range3
+m_szCurrentRange=Range4
 m_szVoltageRange=High
 m_szCtrlValue=0.0001
 m_szExtCtrlValue1=20.00
@@ -882,7 +931,7 @@ m_szExUnitType1=
 m_bSynchronizedStart=0
 m_bAutoPidTips=0
 m_nExtra1=0
-[Schedule_Step15_Limit0]
+[Schedule_Step17_Limit0]
 m_bStepLimit=1
 m_bLogDataLimit=0
 m_szGotoStep=Next Step
@@ -895,9 +944,66 @@ Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step16]
+[Schedule_Step18]
+m_uLimitNum=3
+m_szLabel=OCV delith GITT
+m_szStepCtrlType=Rest
+m_szCurrentRange=Range1
+m_szVoltageRange=High
+m_szCtrlValue=
+m_szExtCtrlValue1=
+m_szExtCtrlValue2=
+m_szExtDef=
+m_uStepCtrlTypeExtFlag=0
+m_szAddIn=
+m_bSampleClockStretch=0
+m_szUnitType=
+m_szExUnitType1=
+m_bSynchronizedStart=0
+m_bAutoPidTips=1
+m_nExtra1=0
+[Schedule_Step18_Limit0]
+m_bStepLimit=1
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=PV_CHAN_Step_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=900
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step18_Limit1]
+m_bStepLimit=0
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=DV_Time
+Equation0_szCompareSign=>=
+Equation0_szRight=30
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step18_Limit2]
+m_bStepLimit=0
+m_bLogDataLimit=1
+m_szGotoStep=Next Step
+Equation0_szLeft=DV_Voltage
+Equation0_szCompareSign=>=
+Equation0_szRight=0.005
+Equation1_szLeft=
+Equation1_szCompareSign=
+Equation1_szRight=
+Equation2_szLeft=
+Equation2_szCompareSign=
+Equation2_szRight=
+[Schedule_Step19]
 m_uLimitNum=1
-m_szLabel=Loop fast
+m_szLabel=Loop GITT
 m_szStepCtrlType=Set Variable(s)
 m_szCurrentRange=Range1
 m_szVoltageRange=High
@@ -913,89 +1019,51 @@ m_szExUnitType1=
 m_bSynchronizedStart=0
 m_bAutoPidTips=0
 m_nExtra1=0
-[Schedule_Step16_Limit0]
+[Schedule_Step19_Limit0]
 m_bStepLimit=1
-m_bLogDataLimit=0
-m_szGotoStep=c4 lith
+m_bLogDataLimit=1
+m_szGotoStep=lith PULSE GITT
 Equation0_szLeft=PV_CHAN_Cycle_Index
 Equation0_szCompareSign=<=
-Equation0_szRight=203
+Equation0_szRight=10
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=
 Equation2_szLeft=
 Equation2_szCompareSign=
 Equation2_szRight=
-[Schedule_Step17]
-m_uLimitNum=4
-m_szLabel=Final delith C20
-m_szStepCtrlType=C-Rate
-m_szCurrentRange=Range3
-m_szVoltageRange=High
-m_szCtrlValue=0.05
-m_szExtCtrlValue1=
-m_szExtCtrlValue2=0
-m_szExtDef=
-m_uStepCtrlTypeExtFlag=0
-m_szAddIn=
-m_bSampleClockStretch=0
-m_szUnitType=
-m_szExUnitType1=
-m_bSynchronizedStart=0
-m_bAutoPidTips=0
-m_nExtra1=0
-[Schedule_Step17_Limit0]
-m_bStepLimit=0
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=DV_Voltage
-Equation0_szCompareSign=>=
-Equation0_szRight=0.005
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step17_Limit1]
-m_bStepLimit=0
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=DV_Time
-Equation0_szCompareSign=>=
-Equation0_szRight=120
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step17_Limit2]
-m_bStepLimit=1
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=PV_CHAN_Step_Time
-Equation0_szCompareSign=>=
-Equation0_szRight=1.728e+006
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
-[Schedule_Step17_Limit3]
-m_bStepLimit=1
-m_bLogDataLimit=1
-m_szGotoStep=Next Step
-Equation0_szLeft=PV_CHAN_Voltage
-Equation0_szCompareSign=>=
-Equation0_szRight=1
-Equation1_szLeft=
-Equation1_szCompareSign=
-Equation1_szRight=
-Equation2_szLeft=
-Equation2_szCompareSign=
-Equation2_szRight=
+[Schedule_Formula0]
+m_szLabel=F_pulse
+m_szExpression=EXP(TC_Counter1*0.693147181 + 0.693147181)
+m_szOperator=+
+m_szX1=1
+m_szX2=TC_Counter1
+m_szX3=0.693147181
+m_szX4=1
+m_szY1=1
+m_szY2=1
+m_szY3=0.693147181
+m_szY4=1
+m_szFuncX=
+m_szFuncY=
+m_szExtFunc1=
+m_szExtFunc2=EXP
+[Schedule_Formula1]
+m_szLabel=F_pause
+m_szExpression=EXP(TC_Counter1*0.693147 + 1.791759469)
+m_szOperator=+
+m_szX1=1
+m_szX2=TC_Counter1
+m_szX3=0.693147
+m_szX4=1
+m_szY1=1
+m_szY2=1
+m_szY3=1.791759469
+m_szY4=1
+m_szFuncX=
+m_szFuncY=
+m_szExtFunc1=
+m_szExtFunc2=EXP
 [Schedule_UserDefineSafety0]
 m_szSafetyType=
 m_fMinValue=0

@@ -14,39 +14,43 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
 
+#schedule_filename = r"test_schedules\1_Standard_3cyc_C20R3-C50R4lith_30cyc_C4R3.sdu"
+schedule_filename = r"test_schedules\6h_rest-3cyc_C20R4-1000cyc_GITT_C2_R4.sdu"
+#schedule_filename = r"test_schedules\Full_cell_Si_NMC_MR_CEF.sdu"
 
-
-schedule_filename = r"test_schedules\1_Standard_3cyc_C20R3-C50R4lith_30cyc_C4R3.sdu"
+cellType = 'half_cell'
+#cellType = 'full_cell'
 
 
 class ResponseFunction:
     
-    def __init__(self):        
+    def __init__(self, cellType = 'half_cell'):        
         self.func = 'undefined'
         self.initPot2Soc()
         self.initFastSoc2Pot()
+        self.cellType = cellType
     
     def _directSoc2Pot(self, SOC):
-        if SOC <= 0:
-            return 3.0
-        elif SOC >= 1:
-            return 0.0
         pot = 0.0005/SOC -4.76*np.power(SOC,6) + 9.34*np.power(SOC,5) - 1.8*np.power(SOC,4) - 7.13*np.power(SOC,3) + 5.8*np.power(SOC,2) - 1.94*SOC + 0.82 + (-(0.2/(1.0001-np.power(SOC,1000))))
-        return  min(max(pot, 0.0),3.0)
+        return  pot.clip(0.0, 3.0)
 
     def initPot2Soc(self):
-        x = [i*1./100000 for i in range(1,100001)]
-        y = [self._directSoc2Pot(i) for i in x]
+#        x = [i*1./100000 for i in range(1,100001)]
+        x = np.linspace(1., 100000., 100000.) / 100000
+        y = self._directSoc2Pot(x)
         self.func = interp1d(x, y)
     
     def initFastSoc2Pot(self):
-        x = [i*1./100000 for i in range(1,100001)]
-        self.fastSoc2PotArray = [self._directSoc2Pot(i) for i in x]    
+        x = np.linspace(1., 100000., 100000.) / 100000
+        self.fastSoc2PotArray = self._directSoc2Pot(x)
         
     def pot2soc(self, POT):
         return self.func(POT)
     
     def fastSoc2Pot(self, SOC):
+        if self.cellType == 'full_cell':
+            SOC = -SOC        
+        
         if SOC <= 0:
             SOC = 1./100000
         elif SOC >= 1:
@@ -59,7 +63,11 @@ class ResponseFunction:
         elif returnValue < 0:
             returnValue = 0
             
-        return returnValue
+        if self.cellType == 'full_cell':
+            return 4.2-returnValue
+        else:
+            return returnValue
+        
     
 
 class Tester:
@@ -71,11 +79,8 @@ class Tester:
         self.schedule.openSchedule(filename)
         self.schedule.buildSchedule()
         
-    def buildCell(self, mass, specific_capacity, deltatime = 2):
-        self.cell = Cell(deltatime)
-#        self.cell.logState()
-        self.cell.deltatime = deltatime
-        self.cell.nominalCapacity = mass*specific_capacity
+    def buildCell(self, mass, specific_capacity, deltatime = 2, cellType = 'half_cell'):
+        self.cell = Cell(deltatime, cellType, mass*specific_capacity)
 
     def runTest(self):
         self.schedule.runCell(self.cell)
@@ -90,16 +95,16 @@ class Tester:
         self.fig.tight_layout()
         self.ax[0, 0].set_title('Voltage')
         self.ax[0, 0].plot(self.output.PV_CHAN_Test_Time, self.output.PV_CHAN_Voltage, label="Voltage")
-        self.ax[0, 0].legend()
+#        self.ax[0, 0].legend(loc=7)
         
         self.ax[0, 1].set_title('Capacity')
         self.ax[0, 1].plot(self.output.PV_CHAN_Test_Time, self.output.PV_CHAN_Charge_Capacity, label="Charge capacity")
         self.ax[0, 1].plot(self.output.PV_CHAN_Test_Time, self.output.PV_CHAN_Discharge_Capacity, label="Discharge capacity")
-        self.ax[0, 1].legend()
+        self.ax[0, 1].legend(loc=1)
 
-        self.ax[1, 0].set_title('Current')
+#        self.ax[1, 0].set_title('Current')
         self.ax[1, 0].plot(self.output.PV_CHAN_Test_Time, self.output.PV_CHAN_Current, label="Current")
-        self.ax[1, 0].legend()
+        self.ax[1, 0].legend(loc=2)
 
         self.ax[1, 1].set_title('Counters')
         self.ax[1, 1].plot(self.output.PV_CHAN_Test_Time, self.output.PV_CHAN_Cycle_Index, label="Cycle index")
@@ -108,17 +113,19 @@ class Tester:
         self.ax[1, 1].plot(self.output.PV_CHAN_Test_Time, self.output.TC_Counter2, label="TC_Counter2")
         self.ax[1, 1].plot(self.output.PV_CHAN_Test_Time, self.output.TC_Counter3, label="TC_Counter3")
         self.ax[1, 1].plot(self.output.PV_CHAN_Test_Time, self.output.TC_Counter4, label="TC_Counter4")
-        self.ax[1, 1].legend()
+        self.ax[1, 1].legend(loc=2)
         
 
 
 class Schedule:
     def __init__(self):
         self.steps = []
+        self.formulas = dict()
         
     def openSchedule(self, filename):
         f = open(filename)
         self.stepinfotable = []
+        self.formulainfolist = []
         level = 0
         
         for line in f.readlines():
@@ -132,6 +139,12 @@ class Schedule:
                 level = 'step'
                 self.stepinfotable.append([dict(), []])
                 self.stepinfotable[-1][0]["StepIndex"] = int(p.group(1)) + 1
+                
+            p = re.match(r'^\[Schedule_Formula([0-9]*)\]$', line)            
+            if p != None:
+                level = 'formula'
+                self.formulainfolist.append(dict())
+                self.formulainfolist[-1]["FormulaIndex"] = int(p.group(1)) + 1
         
             p = re.match(r'^([^=\[]*)=(.*)$', line)
             if p != None:
@@ -143,14 +156,25 @@ class Schedule:
                     self.stepinfotable[-1][0][key] = value
                 elif level == 'limit':
                     self.stepinfotable[-1][1][-1][key] = value
+                elif level == 'formula':
+                    self.formulainfolist[-1][key] = value
+                    
         f.close()
         
     def buildSchedule(self):
-        for stepinfo in self.stepinfotable:
-            self.steps.append(Step(stepinfo))
+        for formulaInfo in self.formulainfolist:
+            self.formulas[formulaInfo['m_szLabel']] = Formula(formulaInfo)
             
+        for stepinfo in self.stepinfotable:
+            self.steps.append(Step(stepinfo, self.formulas))
+            
+         
+       
     def runCell(self, cell):
         currentStep = self.steps[0]
+        
+        self.updateFormulaValuesAndLimits(cell)
+        
         goTo = currentStep.execute(cell)
 
         while not (goTo == "Next Step" and currentStep is self.steps[-1]):
@@ -160,18 +184,55 @@ class Schedule:
                 for step in self.steps:
                     if step.stepName == goTo:
                         currentStep = step
-                        
+            
+            self.updateFormulaValuesAndLimits(cell)
+            
             goTo = currentStep.execute(cell)
+            
+    
+    def updateFormulaValuesAndLimits(self, cell):
+        for formula in self.formulas.values():
+            formula.update(cell.currentstate)
+            
+        for step in self.steps:
+            for limit in step.limits:
+                limit.update()
+            
+
+class Formula:
+    def __init__(self, formulaInfo):
+        self.functionName = formulaInfo["m_szLabel"]
+        self.expression = formulaInfo["m_szExpression"]        
+        self.expression = self.expression.replace("EXP", "np.exp")
+        
+        for variable in ["TC_Counter1", "TC_Counter2", "TC_Counter3", "TC_Counter4", "PC_CHAN_Cycle_Index", "PC_CHAN_Step_Index"]:
+            self.expression = self.expression.replace(variable, "currentstate['" + variable + "']")
+            
+        self.value = 0
                 
+    def update(self, currentstate):
+#        try:
+            self.value = eval(self.expression)
+#        except:
+#            self.value = 0
+#            print("Failed formula")
+                
+    
+    def getValue(self):
+        return self.value
+      
+
 
 class Step:
-    def __init__(self, stepInfo):
+    def __init__(self, stepInfo, formulas):
         self.limits = []        
+        self.stepInfo = stepInfo
+        self.formulas = formulas
         self.stepInfo = stepInfo[0]
 
         for limitInfo in stepInfo[1]:
             if limitInfo['m_bStepLimit'] == '1':
-                self.limits.append(Limit(limitInfo))
+                self.limits.append(Limit(limitInfo, formulas))
                 
         self.stepName = self.stepInfo['m_szLabel']
         self.stepType = self.stepInfo['m_szStepCtrlType']
@@ -268,6 +329,8 @@ class Step:
             if decrementarray[3] == '1':
                 cell.schangeC4(-1)
                 
+            
+                
             isTriggered, goTo = self.checkLimits(cell.currentstate)
 
             if not isTriggered:
@@ -277,16 +340,24 @@ class Step:
             return goTo
 
     def checkLimits(self, currentstate):
+        returnBool = False
+        returnGoTo = ""
+        
         for limit in self.limits:
             isTriggered, goTo = limit.checktrigger(currentstate)
-            if isTriggered == True:
+            if isTriggered == True and limit.limitParameter != "PV_CHAN_Step_Time":
                 return isTriggered, goTo
-        
-        return isTriggered, goTo
+            elif isTriggered == True:
+                returnBool = isTriggered
+                returnGoTo = goTo
+                
+        return returnBool, returnGoTo
         
         
 class Limit:
-    def __init__(self, limitInfo):
+    def __init__(self, limitInfo, formulas):
+        self.limitInfo = limitInfo
+        self.formulas = formulas
         ops = {
             '<': operator.lt,
             '<=': operator.le,
@@ -298,10 +369,21 @@ class Limit:
         
         self.limitParameter = limitInfo['Equation0_szLeft']
         self.limitOperator = ops[limitInfo['Equation0_szCompareSign']]
-        self.limitValue = float(limitInfo['Equation0_szRight'])
+        
+        try:
+            self.limitValue = float(limitInfo['Equation0_szRight'])
+        except:
+            self.limitValue = formulas[limitInfo['Equation0_szRight']].getValue()
         self.targetStep = limitInfo['m_szGotoStep']
 
         
+    def update(self):
+        try:
+            self.limitValue = float(self.limitInfo['Equation0_szRight'])
+        except:
+            self.limitValue = self.formulas[self.limitInfo['Equation0_szRight']].getValue()
+
+
     def checktrigger(self, currentstate):
         isTriggered = False
         goTo = self.targetStep
@@ -310,22 +392,27 @@ class Limit:
             isTriggered = True
         
         return isTriggered, goTo
+    
+    
+
         
 
 class Cell:
-    def __init__(self, deltatime, SOClength = 20):
+    def __init__(self, deltatime, cellType, nominalCapacity = 1, SOClength = 20):
         self.SOClength = SOClength
         self.deltatime = deltatime
 
         self.initState()
         self.log = []
-        self.voltageResponse = ResponseFunction()
+        self.voltageResponse = ResponseFunction(cellType)
         
-        self.nominalCapacity = 0
+        self.nominalCapacity = nominalCapacity
         self.currentCapacity = 0
+        self.SOCdistribution = np.zeros(SOClength)
         self.SOCdistribution = [0 for i in range(SOClength)]
         self.lastPrint = time.time()
-        self.tempSOCdistribution = [0 for i in range(self.SOClength)]
+        self.tempSOCdistribution = np.zeros(SOClength)
+        self.tempSOCdistribution = [0 for i in range(SOClength)]
 
                 
     def initState(self):
@@ -344,7 +431,8 @@ class Cell:
                              "Internal_Resistance":0,
                              "Current_Capacity":0,
                              "Surface_Capacity":0,
-                             "Capacity_Profile":[0 for i in range(self.SOClength)]}
+                             "Capacity_Profile":0,
+                             "Formula_Values":0}
         
     def incrementTime(self):
         self.currentstate["PV_CHAN_Test_Time"] += self.deltatime
@@ -363,16 +451,29 @@ class Cell:
             self.currentstate["PV_CHAN_Charge_Capacity"] += crate*self.nominalCapacity*self.deltatime/3600
             
     def updateInternalResistance(self):
-        self.currentstate["Internal_Resistance"] = (1 - self.currentCapacity/self.nominalCapacity)*40 + np.random.random()*10
+        self.currentstate["Internal_Resistance"] = (1 - self.currentCapacity/self.nominalCapacity)*10 + np.random.random()*5
         
     def updateSOCdistribution(self, crate):
         distributionFactor = self.deltatime/10
-        self.tempSOCdistribution[0] = self.SOCdistribution[0] - crate*self.nominalCapacity*self.deltatime/3600*self.SOClength - (self.SOCdistribution[0] - self.SOCdistribution[1])*distributionFactor
         for i in range(1,self.SOClength-1):
-            self.tempSOCdistribution[i] = self.SOCdistribution[i] + (self.SOCdistribution[i-1] - self.SOCdistribution[i] - self.SOCdistribution[i] + self.SOCdistribution[i+1])*distributionFactor
+            self.tempSOCdistribution[i] = self.SOCdistribution[i] * (1-distributionFactor*2) + (self.SOCdistribution[i-1] + self.SOCdistribution[i+1])*distributionFactor
+
+
+        self.tempSOCdistribution[0] = self.SOCdistribution[0] - crate*self.nominalCapacity*self.deltatime/3600*self.SOClength - (self.SOCdistribution[0] - self.SOCdistribution[1])*distributionFactor
         self.tempSOCdistribution[-1] = self.SOCdistribution[-1] +  (self.SOCdistribution[-2]-self.SOCdistribution[-1])*distributionFactor
         
         self.SOCdistribution = self.tempSOCdistribution
+        
+#    def updateSOCdistribution(self, crate):
+#        distributionFactor = self.deltatime/10
+#        SOCleft = self.SOCdistribution[:-2]*distributionFactor
+#        SOCright = self.SOCdistribution[2:]*distributionFactor
+#        
+#        self.tempSOCdistribution[1:-1] = self.SOCdistribution[1:-1] * (1-distributionFactor*2) + SOCleft + SOCright
+#        self.tempSOCdistribution[0] = self.SOCdistribution[0] - crate*self.nominalCapacity*self.deltatime/3600*self.SOClength - (self.SOCdistribution[0] - self.SOCdistribution[1])*distributionFactor
+#        self.tempSOCdistribution[-1] = self.SOCdistribution[-1] +  (self.SOCdistribution[-2]-self.SOCdistribution[-1])*distributionFactor
+#        
+#        self.SOCdistribution = self.tempSOCdistribution
 
     def updateCellVoltage(self):
         nominalVoltage = self.voltageResponse.fastSoc2Pot(self.SOCdistribution[0]/self.nominalCapacity)        
@@ -427,9 +528,12 @@ class Cell:
         self.currentstate["TC_Counter4"] += c4c
         
     def logState(self):            
-        self.log.append([self.currentstate[key] for key in self.currentstate.keys()])
+        self.log.append([*self.currentstate.values()])
+#        pass
         
-        
+
+
+
 
 
 def run():
@@ -439,12 +543,13 @@ def run():
     
     tester = Tester()
     tester.setSchedule(schedule_filename)
-    tester.buildCell(0.002, 3.579, deltatime = 1.0)
+    tester.buildCell(0.002, 3.579, deltatime = 1.0, cellType = cellType)
     tester.runTest()
     tester.prepareOutput()
     tester.plotOverview()
 
-performance_run = True
+
+performance_run = False
 
 if performance_run:
     import cProfile
@@ -459,13 +564,16 @@ if performance_run:
     ps.print_stats()
     stream.close()
 else:
-    run()
-
-
-
-
-
-
+    schedule = Schedule()
+    schedule.openSchedule(schedule_filename)
+    schedule.buildSchedule()
+    
+    tester = Tester()
+    tester.setSchedule(schedule_filename)
+    tester.buildCell(0.002, 3.579, deltatime = 2.0, cellType = cellType)
+    tester.runTest()
+    tester.prepareOutput()
+    tester.plotOverview()
 
 
 
