@@ -919,7 +919,7 @@ m_bLogDataLimit=0
 m_szGotoStep=c4 lith
 Equation0_szLeft=PV_CHAN_Cycle_Index
 Equation0_szCompareSign=<=
-Equation0_szRight=203
+Equation0_szRight=33
 Equation1_szLeft=
 Equation1_szCompareSign=
 Equation1_szRight=

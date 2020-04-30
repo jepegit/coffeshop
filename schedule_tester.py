@@ -12,14 +12,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import pathlib
 
 
 #schedule_filename = r"test_schedules\1_Standard_3cyc_C20R3-C50R4lith_30cyc_C4R3.sdu"
-#schedule_filename = r"test_schedules\6h_rest-3cyc_C20R4-1000cyc_GITT_C2_R4.sdu"
-#schedule_filename = r"test_schedules\Full_cell_Si_NMC_MR_CEF.sdu"
-#schedule_filename = r"test_schedules\SAGA_C10form-C2longterm-CEF.sdu"
-#schedule_filename = r"test_schedules\Tilsiktcycling5mV_2020.sdu"
-schedule_filename = r"test_schedules\1cyc_C10R4_with_3_GITT_pulses_R4.sdu"
+
+schedule_path = pathlib.Path("test_schedules")
+schedule_filename = schedule_path / "1_Standard_3cyc_C20R3-C50R4lith_30cyc_C4R3.sdu"
 
 cellType = 'half_cell'
 #cellType = 'full_cell'
@@ -129,44 +128,49 @@ class Schedule:
         self.formulas = dict()
         
     def openSchedule(self, filename):
-        f = open(filename)
-        self.stepinfotable = []
-        self.formulainfolist = []
-        level = 0
-        
-        for line in f.readlines():
-            p = re.match(r'^\[Schedule_Step([0-9]*)_Limit([0-9]*)\]$', line)            
-            if p != None:
-                level = 'limit'
-                self.stepinfotable[-1][1].append(dict())
+        with open(filename, 'rb') as f:
+            self.stepinfotable = []
+            self.formulainfolist = []
+            level = 0
             
-            p = re.match(r'^\[Schedule_Step([0-9]*)\]$', line)            
-            if p != None:
-                level = 'step'
-                self.stepinfotable.append([dict(), []])
-                self.stepinfotable[-1][0]["StepIndex"] = int(p.group(1)) + 1
-                
-            p = re.match(r'^\[Schedule_Formula([0-9]*)\]$', line)            
-            if p != None:
-                level = 'formula'
-                self.formulainfolist.append(dict())
-                self.formulainfolist[-1]["FormulaIndex"] = int(p.group(1)) + 1
-        
-            p = re.match(r'^([^=\[]*)=(.*)$', line)
-            if p != None:
-                p = re.match(r'^([^=]*)=(.*)$', line)
-                key = p.group(1)
-                value = p.group(2)
-
-                if level == 'step':
-                    self.stepinfotable[-1][0][key] = value
-                elif level == 'limit':
-                    self.stepinfotable[-1][1][-1][key] = value
-                elif level == 'formula':
-                    self.formulainfolist[-1][key] = value
+            for line in f.readlines():
+                try:
+                    line = line.decode('utf-8')
+                    p = re.match(r'^\[Schedule_Step([0-9]*)_Limit([0-9]*)\]$', line)            
+                    if p != None:
+                        level = 'limit'
+                        self.stepinfotable[-1][1].append(dict())
                     
-        f.close()
+                    p = re.match(r'^\[Schedule_Step([0-9]*)\]$', line)            
+                    if p != None:
+                        level = 'step'
+                        self.stepinfotable.append([dict(), []])
+                        self.stepinfotable[-1][0]["StepIndex"] = int(p.group(1)) + 1
+                        
+                    p = re.match(r'^\[Schedule_Formula([0-9]*)\]$', line)            
+                    if p != None:
+                        level = 'formula'
+                        self.formulainfolist.append(dict())
+                        self.formulainfolist[-1]["FormulaIndex"] = int(p.group(1)) + 1
+                
+                    p = re.match(r'^([^=\[]*)=(.*)$', line)
+                    if p != None:
+                        p = re.match(r'^([^=]*)=(.*)$', line)
+                        key = p.group(1)
+                        value = p.group(2)
         
+                        if level == 'step':
+                            self.stepinfotable[-1][0][key] = value
+                        elif level == 'limit':
+                            self.stepinfotable[-1][1][-1][key] = value
+                        elif level == 'formula':
+                            self.formulainfolist[-1][key] = value
+
+                except UnicodeDecodeError as e:
+                    print(f"error in line:\n {f}")
+                    print(e)
+                    
+            
     def buildSchedule(self):
         for formulaInfo in self.formulainfolist:
             self.formulas[formulaInfo['m_szLabel']] = Formula(formulaInfo)
@@ -182,7 +186,7 @@ class Schedule:
         self.updateFormulaValuesAndLimits(cell)
         
         goTo = currentStep.execute(cell)
-        print("Moving from first step to ",goTo)
+#        print("Moving from first step to ",goTo)
 
         while not (goTo == "End Test" or (goTo == "Next Step" and currentStep is self.steps[-1])):
             if goTo == "Next Step":
@@ -192,12 +196,12 @@ class Schedule:
                     if step.stepName == goTo:
                         currentStep = step
             
-            print("Currently at", currentStep.stepName)
+#            print("Currently at", currentStep.stepName)
             
             self.updateFormulaValuesAndLimits(cell)
             
             goTo = currentStep.execute(cell)
-            print("Going to", goTo)
+#            print("Going to", goTo)
             
     
     def updateFormulaValuesAndLimits(self, cell):
@@ -595,10 +599,13 @@ if performance_run:
     pr.run('run()')
     pr.dump_stats('output.prof')
     
-    stream = open(r'test_schedules\log.txt', 'w')
+    log_path = pathlib.Path("test_schedules\logs")
+    log_filename = schedule_path / "log_" + time.strftime('%Y%m%d-%H%M%S') + ".sdu"
+    stream = open(log_filename, 'w')
     ps = pstats.Stats('output.prof', stream=stream).sort_stats('cumulative')
     ps.print_stats()
     stream.close()
+    
 else:
     schedule = Schedule()
     schedule.openSchedule(schedule_filename)
