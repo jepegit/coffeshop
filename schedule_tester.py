@@ -15,11 +15,17 @@ from scipy.interpolate import interp1d
 
 
 #schedule_filename = r"test_schedules\1_Standard_3cyc_C20R3-C50R4lith_30cyc_C4R3.sdu"
-schedule_filename = r"test_schedules\6h_rest-3cyc_C20R4-1000cyc_GITT_C2_R4.sdu"
+#schedule_filename = r"test_schedules\6h_rest-3cyc_C20R4-1000cyc_GITT_C2_R4.sdu"
 #schedule_filename = r"test_schedules\Full_cell_Si_NMC_MR_CEF.sdu"
+#schedule_filename = r"test_schedules\SAGA_C10form-C2longterm-CEF.sdu"
+#schedule_filename = r"test_schedules\Tilsiktcycling5mV_2020.sdu"
+schedule_filename = r"test_schedules\1cyc_C10R4_with_3_GITT_pulses_R4.sdu"
 
 cellType = 'half_cell'
 #cellType = 'full_cell'
+
+deltaTime = 2
+SOClength = 20
 
 
 class ResponseFunction:
@@ -79,8 +85,8 @@ class Tester:
         self.schedule.openSchedule(filename)
         self.schedule.buildSchedule()
         
-    def buildCell(self, mass, specific_capacity, deltatime = 2, cellType = 'half_cell'):
-        self.cell = Cell(deltatime, cellType, mass*specific_capacity)
+    def buildCell(self, mass, specific_capacity, deltatime = 2, cellType = 'half_cell', SOClength = 20):
+        self.cell = Cell(deltatime, cellType, mass*specific_capacity, SOClength = SOClength)
 
     def runTest(self):
         self.schedule.runCell(self.cell)
@@ -176,8 +182,9 @@ class Schedule:
         self.updateFormulaValuesAndLimits(cell)
         
         goTo = currentStep.execute(cell)
+        print("Moving from first step to ",goTo)
 
-        while not (goTo == "Next Step" and currentStep is self.steps[-1]):
+        while not (goTo == "End Test" or (goTo == "Next Step" and currentStep is self.steps[-1])):
             if goTo == "Next Step":
                 currentStep = self.steps[self.steps.index(currentStep)+1]
             else:
@@ -185,9 +192,12 @@ class Schedule:
                     if step.stepName == goTo:
                         currentStep = step
             
+            print("Currently at", currentStep.stepName)
+            
             self.updateFormulaValuesAndLimits(cell)
             
             goTo = currentStep.execute(cell)
+            print("Going to", goTo)
             
     
     def updateFormulaValuesAndLimits(self, cell):
@@ -211,10 +221,10 @@ class Formula:
         self.value = 0
                 
     def update(self, currentstate):
-#        try:
+        try:
             self.value = eval(self.expression)
-#        except:
-#            self.value = 0
+        except:
+            self.value = 0
 #            print("Failed formula")
                 
     
@@ -225,7 +235,8 @@ class Formula:
 
 class Step:
     def __init__(self, stepInfo, formulas):
-        self.limits = []        
+        self.limits = []
+        self.loglimits = []        
         self.stepInfo = stepInfo
         self.formulas = formulas
         self.stepInfo = stepInfo[0]
@@ -233,6 +244,8 @@ class Step:
         for limitInfo in stepInfo[1]:
             if limitInfo['m_bStepLimit'] == '1':
                 self.limits.append(Limit(limitInfo, formulas))
+            elif limitInfo['m_bLogDataLimit'] == '1':
+                self.loglimits.append(Limit(limitInfo, formulas))
                 
         self.stepName = self.stepInfo['m_szLabel']
         self.stepType = self.stepInfo['m_szStepCtrlType']
@@ -259,9 +272,11 @@ class Step:
                 cell.incrementTime()
                 cell.incrementCurrent(self.cRate)
                 cell.updateCellVoltage()
-                cell.logState()
+#                cell.logState()
+                if self.checkLogLimits(cell.currentstate):
+                    cell.logState()
                 isTriggered, goTo = self.checkLimits(cell.currentstate)
-                
+            
                 if isTriggered:
                     cell.logState()
                     running = False
@@ -275,7 +290,9 @@ class Step:
                 cell.incrementTime()
                 cell.incrementCurrent(0)
                 cell.updateCellVoltage()
-                cell.logState()
+#                cell.logState()
+                if self.checkLogLimits(cell.currentstate):
+                    cell.logState()
                 
                 isTriggered, goTo = self.checkLimits(cell.currentstate)
                 if isTriggered:
@@ -287,6 +304,7 @@ class Step:
         elif self.stepType == "Internal Resistance":
 #            print("Running step number", self.stepIndex, "which is a step of type", self.stepType)
             cell.updateInternalResistance()
+            cell.logState()
             return self.limits[0].targetStep
             
                         
@@ -298,13 +316,13 @@ class Step:
                 cell.zeroChargeCap()
             if zeroarray[1] == '1':
                 cell.zeroDischargeCap()
-            if zeroarray[17] == '1':
+            if zeroarray[16] == '1':
                 cell.setC1(0)
-            if zeroarray[18] == '1':
+            if zeroarray[17] == '1':
                 cell.setC2(0)
-            if zeroarray[19] == '1':
+            if zeroarray[18] == '1':
                 cell.setC3(0)
-            if zeroarray[20] == '1':
+            if zeroarray[19] == '1':
                 cell.setC4(0)
                                 
             incrementarray = '{0:32b}'.format(int(self.increment))[::-1]
@@ -317,7 +335,7 @@ class Step:
             if incrementarray[3] == '1':
                 cell.changeC3(1)
             if incrementarray[4] == '1':
-                cell.schangeC4(1)
+                cell.changeC4(1)
             
             decrementarray = '{0:32b}'.format(int(self.decrement))[::-1]
             if decrementarray[0] == '1':
@@ -327,7 +345,9 @@ class Step:
             if decrementarray[2] == '1':
                 cell.changeC3(-1)
             if decrementarray[3] == '1':
-                cell.schangeC4(-1)
+                cell.changeC4(-1)
+                
+            cell.logState()
                 
             
                 
@@ -352,6 +372,13 @@ class Step:
                 returnGoTo = goTo
                 
         return returnBool, returnGoTo
+    
+    def checkLogLimits(self, currentstate):        
+        for limit in self.loglimits:
+            isTriggered, goTo = limit.checktrigger(currentstate)
+            if isTriggered:
+                return True
+        return False
         
         
 class Limit:
@@ -388,8 +415,9 @@ class Limit:
         isTriggered = False
         goTo = self.targetStep
         
-        if self.limitOperator(currentstate[self.limitParameter],self.limitValue):
-            isTriggered = True
+        if self.limitParameter in currentstate.keys():
+            if self.limitOperator(currentstate[self.limitParameter],self.limitValue):
+                isTriggered = True
         
         return isTriggered, goTo
     
@@ -411,6 +439,7 @@ class Cell:
         self.SOCdistribution = np.zeros(SOClength)
         self.SOCdistribution = [0 for i in range(SOClength)]
         self.lastPrint = time.time()
+        self.lastLogVoltage = 0
         self.tempSOCdistribution = np.zeros(SOClength)
         self.tempSOCdistribution = [0 for i in range(SOClength)]
 
@@ -432,11 +461,15 @@ class Cell:
                              "Current_Capacity":0,
                              "Surface_Capacity":0,
                              "Capacity_Profile":0,
-                             "Formula_Values":0}
+                             "Formula_Values":0,
+                             "DV_Time":0,
+                             "DV_Voltage":0}
         
     def incrementTime(self):
         self.currentstate["PV_CHAN_Test_Time"] += self.deltatime
         self.currentstate["PV_CHAN_Step_Time"] += self.deltatime
+        self.currentstate["DV_Time"] += self.deltatime
+        
 
     def incrementCurrent(self, crate):
         self.currentstate["PV_CHAN_Current"] = crate*self.nominalCapacity
@@ -480,6 +513,7 @@ class Cell:
         irDrop = self.currentstate["PV_CHAN_Current"]*self.currentstate["Internal_Resistance"]
 #        irDrop = 0
         self.currentstate["PV_CHAN_Voltage"] = nominalVoltage + irDrop
+        self.currentstate["DV_Voltage"] = abs(self.lastLogVoltage - self.currentstate["PV_CHAN_Voltage"])
         
     
     def zeroChargeCap(self):
@@ -528,7 +562,9 @@ class Cell:
         self.currentstate["TC_Counter4"] += c4c
         
     def logState(self):            
-        self.log.append([*self.currentstate.values()])
+        self.log.append([i for i in self.currentstate.values()])
+        self.lastLogVoltage = self.currentstate["PV_CHAN_Voltage"]
+        self.currentstate["DV_Time"] = 0
 #        pass
         
 
@@ -543,7 +579,7 @@ def run():
     
     tester = Tester()
     tester.setSchedule(schedule_filename)
-    tester.buildCell(0.002, 3.579, deltatime = 1.0, cellType = cellType)
+    tester.buildCell(0.001, 1.000, deltatime = deltaTime, cellType = cellType, SOClength = SOClength)
     tester.runTest()
     tester.prepareOutput()
     tester.plotOverview()
@@ -570,7 +606,7 @@ else:
     
     tester = Tester()
     tester.setSchedule(schedule_filename)
-    tester.buildCell(0.002, 3.579, deltatime = 2.0, cellType = cellType)
+    tester.buildCell(0.001, 1.000, deltatime = deltaTime, cellType = cellType, SOClength = SOClength)
     tester.runTest()
     tester.prepareOutput()
     tester.plotOverview()
