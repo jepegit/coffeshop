@@ -66,7 +66,7 @@ Dens = CB * rho_CB + Bind * rho_dead + Siut * rho_si + Gr * rho_graphite
 
 Vv = Mass / Dens  # volume electrode material
 Porosity = (Vt - Vv) / Vt
-### reference Theoretical Limits of Energy Density in Silicon-Carbon Composite Anode Based Lithium Ion Batteries
+### reference Theoretical Limits of Energy Density in Silicon-Carbon Composite Anode Based Lithium Ion Batteries /NB Retracted paper
 wsi = 0.05  # weight % Si
 wc = 0.9  # weight % Carbon
 wb = 0.05  # weight % binder
