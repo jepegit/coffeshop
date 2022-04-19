@@ -12,32 +12,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
-#import pathlib
-
-
-##schedule_filename = r"test_schedules\1_Standard_3cyc_C20R3-C50R4lith_30cyc_C4R3.sdu"
-#
-#schedule_path = pathlib.Path("test_schedules")
-#schedule_name = "1_Standard_3cyc_C20R3-C50R4lith_30cyc_C4R3.sdu"
-#schedule_name = "MRR0001_Cycle.sdu"
-#schedule_name = "MRR0001_Cycle_C5.sdu"
-##schedule_name = "MRR0002_Rate.sdu"
-##schedule_name = "MRR0001_Cycle.sdu"
-##schedule_name = "Half_cell_1.0-0.05V-5cycC20R3_C10R3_C5R2_C2R2_1CR2_2CR1-1000cyc_C5R2.sdu"
-#schedule_name = "Half_cell_1.0-0.05V_1cycC20R4C50R4C100R4C200R4lithC20R4delith_2cyc_C10R4-2cyc_C5R3-2000cyc_C2R3.sdu"
-#schedule_name = "Tilsiktcycling5mV_2020.sdu"
-#schedule_name = "Half_cell_1V-0dot05V_12h-rest_Formation-3xC20R4-taperC50R4_Cycling_50xC2R3-2xC20R4-2xC10R3-5times.sdu"
-#
-#
-#schedule_filename = schedule_path / schedule_name
-#
-#
-#cellType = 'half_cell'
-##cellType = 'full_cell'
-#
-#deltaTime = 2
-#SOClength = 20
-#maxCycles = 300
+from bokeh.io import output_file, show
+from bokeh.layouts import gridplot
+from bokeh.plotting import figure
+import bokeh.palettes as palettes
+import pathlib
 
 
 class ResponseFunction:
@@ -49,41 +28,65 @@ class ResponseFunction:
         self.cellType = cellType
     
     def _directSoc2Pot(self, SOC):
-        pot = 0.0005/SOC -4.76*np.power(SOC,6) + 9.34*np.power(SOC,5) - 1.8*np.power(SOC,4) - 7.13*np.power(SOC,3) + 5.8*np.power(SOC,2) - 1.94*SOC + 0.82 + (-(0.2/(1.0001-np.power(SOC,1000))))
-        return  pot.clip(0.0, 3.0)
+        # pot = 0.0005/SOC -4.76*np.power(SOC,6) + 9.34*np.power(SOC,5) - 1.8*np.power(SOC,4) - 7.13*np.power(SOC,3) + 5.8*np.power(SOC,2) - 1.94*SOC + 0.82 + (-(0.2/(1.0001-np.power(SOC,1000))))
+        pot = 0.0000002975*np.power(SOC+0.005,-3) - 4.76*np.power(SOC,6) + 9.34*np.power(SOC,5) - 1.8*np.power(SOC,4) - 7.13*np.power(SOC,3) + 5.8*np.power(SOC,2) - 1.94*SOC + 0.82 - 0.2 - (0.0000000001/(np.power((1.005-SOC),4)))
+        return pot
+        # return  pot.clip(0.0, 3.0)
 
     def initPot2Soc(self):
 #        x = [i*1./100000 for i in range(1,100001)]
-        x = np.linspace(1., 100000., 100000.) / 100000
+        x = np.linspace(0, 100000, 100000) / 100000
         y = self._directSoc2Pot(x)
         self.func = interp1d(x, y)
     
     def initFastSoc2Pot(self):
-        x = np.linspace(1., 100000., 100000.) / 100000
+        x = np.linspace(-499, 100500, 100999) / 100000
         self.fastSoc2PotArray = self._directSoc2Pot(x)
         
     def pot2soc(self, POT):
         return self.func(POT)
     
     def fastSoc2Pot(self, SOC):
-        if self.cellType == 'full_cell':
+        if 'full_cell' in self.cellType:
             SOC = -SOC        
         
-        if SOC <= 0:
-            SOC = 1./100000
-        elif SOC >= 1:
-            SOC = 1.-1./100000
-
-        returnValue = self.fastSoc2PotArray[int(SOC*100000)]
+        # if SOC <= -19./100000:
+        #     SOC = -19./100000
+        # elif SOC >= 1:
+        #     SOC = 1.-1./100000
         
-        if returnValue > 3:
-            returnValue = 3
-        elif returnValue < 0:
-            returnValue = 0
+        returnValue = self.fastSoc2PotArray[int(SOC*100000+498)]
+        # print(SOC, returnValue)
+
+
             
-        if self.cellType == 'full_cell':
-            return 4.2-returnValue
+        if 'full_cell' in self.cellType:
+            if 'NMC' in self.cellType:                
+                if returnValue > 2.25:
+                    returnValue = 2.25
+                elif returnValue < -3:
+                    returnValue = -3
+                return 4.5-returnValue*2
+            
+            elif 'LFP' in self.cellType:
+                if returnValue > 3.6:
+                    returnValue = 3.6
+                elif returnValue < -3.6:
+                    returnValue = -3.6
+                return 3.6-returnValue
+
+            else:
+                if returnValue > 2.0:
+                    returnValue = 2.0
+                elif returnValue < -3:
+                    returnValue = -3
+                return 4.0-returnValue*2
+                
         else:
+            if returnValue > 3:
+                returnValue = 3
+            elif returnValue < 0:
+                returnValue = 0
             return returnValue
         
     
@@ -132,6 +135,63 @@ class Tester:
         self.ax[1, 1].plot(self.output.PV_CHAN_Test_Time, self.output.TC_Counter3, label="TC_Counter3")
         self.ax[1, 1].plot(self.output.PV_CHAN_Test_Time, self.output.TC_Counter4, label="TC_Counter4")
         self.ax[1, 1].legend(loc=2)
+        
+    def plotOverviewBokeh(self, filename, fig_width=1900, fig_height=960, line_width=1, line_alpha=1, showPlot = True):
+        output_file(filename)
+        self.output.to_excel(filename.with_suffix(".xlsx"))
+        
+        x = self.output.PV_CHAN_Test_Time
+        v = self.output.PV_CHAN_Voltage
+        
+        cc = self.output.PV_CHAN_Charge_Capacity
+        dc = self.output.PV_CHAN_Discharge_Capacity
+        
+        c = self.output.PV_CHAN_Current
+        
+        ci = self.output.PV_CHAN_Cycle_Index
+        si = self.output.PV_CHAN_Step_Index
+        c1 = self.output.TC_Counter1
+        c2 = self.output.TC_Counter2
+        c3 = self.output.TC_Counter3
+        c4 = self.output.TC_Counter4
+        
+        width = int(fig_width/2)
+        height = int(fig_height/2)
+        colors = palettes.Category10_10
+        
+        s11 = figure(width=width, height=height, title="Voltage")
+        for data, name, color in zip([v], ["Voltage"], colors):
+            s11.line(x, data, legend_label=name, line_width=line_width, line_color=color, line_alpha=line_alpha, )
+        s11.legend.location = "top_right"
+        s11.legend.click_policy="hide"
+   
+        s12 = figure(width=width, height=height, x_range=s11.x_range, title="Capacity")
+        for data, name, color in zip([cc, dc], ["Charge Capacity", "Discharge Capacity"], colors):
+            s12.line(x, data, line_width=line_width, line_color=color, line_alpha=line_alpha, legend_label=name)
+        s12.legend.location = "top_right"
+        s12.legend.click_policy="hide"
+
+   
+        s21 = figure(width=width, height=height, x_range=s11.x_range, title="Current")
+        for data, name, color in zip([c], ["Current"], colors):
+            s21.line(x, data, line_width=line_width, line_color=color, line_alpha=line_alpha, legend_label=name)
+        s21.legend.location = "top_left"
+        s21.legend.click_policy="hide"
+
+        s22 = figure(width=width, height=height, x_range=s11.x_range, title="Counters")
+        for data, name, color in zip([ci, si, c1, c2, c3, c4], ["Cycle index", "Step index", "TC_Counter1", "TC_Counter2", "TC_Counter3", "TC_Counter4"], colors):
+            s22.line(x, data, line_width=line_width, line_color=color, line_alpha=line_alpha, legend_label=name)
+        s22.legend.location = "top_left"
+        s22.legend.click_policy="hide"
+
+    
+        p = gridplot([[s11, s12],[s21, s22]])
+        
+        if showPlot:
+            show(p)
+        
+        
+        
     
     def saveOverview(self, filename, dpi = 600, figheight = 9, figwidth = 16):
         self.fig.set_figheight(figheight)
@@ -200,27 +260,26 @@ class Schedule:
          
        
     def runCell(self, cell, maxCycles):
-        currentStep = self.steps[0]
+        self.currentStep = self.steps[0]
         
         self.updateFormulaValuesAndLimits(cell)
         
-        goTo = currentStep.execute(cell)
+        goTo = self.currentStep.execute(cell)
 #        print("Moving from first step to ",goTo)
         
-        cell.currentstate["PV_CHAN_Cycle_Index"] = 0
-        while not (goTo == "End Test" or (goTo == "Next Step" and currentStep is self.steps[-1]) or cell.currentstate["PV_CHAN_Cycle_Index"] > maxCycles):
+        while not (goTo == "End Test" or (goTo == "Next Step" and self.currentStep is self.steps[-1]) or cell.currentstate["PV_CHAN_Cycle_Index"] > maxCycles):
             if goTo == "Next Step":
-                currentStep = self.steps[self.steps.index(currentStep)+1]
+                self.currentStep = self.steps[self.steps.index(self.currentStep)+1]
             else:
                 for step in self.steps:
                     if step.stepName == goTo:
-                        currentStep = step
+                        self.currentStep = step
             
-#            print("Currently at", currentStep.stepName)
+#            print("Currently at", self.currentStep.stepName)
             
             self.updateFormulaValuesAndLimits(cell)
             
-            goTo = currentStep.execute(cell)
+            goTo = self.currentStep.execute(cell)
 #            print("Going to", goTo)
             
     
@@ -249,6 +308,7 @@ class Formula:
             self.value = eval(self.expression)
         except:
             self.value = 0
+            
 #            print("Failed formula")
                 
     
@@ -275,9 +335,24 @@ class Step:
         self.stepType = self.stepInfo['m_szStepCtrlType']
         self.stepIndex = self.stepInfo["StepIndex"]
 
+
+        print('')
+        print("Step index: ", self.stepIndex)
+        print("Step name: ", self.stepName)
+        print("Step type: ", self.stepType)
+
         try:        
             if self.stepType == 'C-Rate':
-                self.cRate = float(self.stepInfo['m_szCtrlValue'])
+                try:
+                    self.cRate = float(self.stepInfo['m_szCtrlValue'])
+                except:
+                    self.cRate = self.stepInfo['m_szCtrlValue']
+                self.current = 'null'
+                print('C-rate: ', self.cRate)
+            if self.stepType == 'Current(A)':
+                self.cRate = 'null'
+                self.current = float(self.stepInfo['m_szCtrlValue'])
+                print('Current: ', self.current)
             elif self.stepType == 'Rest':
                 self.cRate = 0
             elif self.stepType == 'Set Variable(s)':
@@ -294,10 +369,11 @@ class Step:
                 if self.stepInfo['m_szExtCtrlValue2'] != "":
                     self.decrement = int(self.stepInfo['m_szExtCtrlValue2'])
                 else:
-                    self.decrement = 0
+                    self.decrement = 0            
                     
         except:
             print("Error in interpretation of step", self.stepIndex)
+        
             
             
     def execute(self, cell):
@@ -310,7 +386,11 @@ class Step:
             running = True        
             while running:
                 cell.incrementTime()
-                cell.incrementCurrent(self.cRate)
+                if type(self.cRate) == float:
+                    cell.incrementCurrent(crate = self.cRate)
+                elif type(self.cRate) == str:
+                    cell.incrementCurrent(crate = self.formulas[self.cRate].getValue())
+                    
                 cell.updateCellVoltage()
 #                cell.logState()
                 
@@ -324,13 +404,32 @@ class Step:
                     
             
             return goTo
+                
+        elif self.stepType == "Current(A)":
+#            print("Running step number", self.stepIndex, "which is a step of type", self.stepType)
+            running = True        
+            while running:
+                cell.incrementTime()
+                cell.incrementCurrent(current = self.current)
+                cell.updateCellVoltage()
+#                cell.logState()
+                
+                isTriggered, goTo = self.checkLimits(cell.currentstate)
+            
+                if isTriggered:
+                    cell.logState()
+                    running = False
+                elif self.checkLogLimits(cell.currentstate):
+                    cell.logState()
+                    
+            return goTo
             
         elif self.stepType == "Rest":
 #            print("Running step number", self.stepIndex, "which is a step of type", self.stepType)
             running = True
             while running:
                 cell.incrementTime()
-                cell.incrementCurrent(0)
+                cell.incrementCurrent(crate = 0)
                 cell.updateCellVoltage()
 #                cell.logState()
                 if self.checkLogLimits(cell.currentstate):
@@ -341,8 +440,8 @@ class Step:
                     running = False
             
             return goTo
-                
-                
+
+                        
         elif self.stepType == "Internal Resistance":
 #            print("Running step number", self.stepIndex, "which is a step of type", self.stepType)
             cell.updateInternalResistance()
@@ -444,6 +543,11 @@ class Limit:
         except:
             self.limitValue = formulas[limitInfo['Equation0_szRight']].getValue()
         self.targetStep = limitInfo['m_szGotoStep']
+        
+        print('Limit parameter:', self.limitParameter)
+        print('Limit operator:', self.limitOperator)
+        print('Limit value:', self.limitValue)
+        print('Target step:', self.targetStep)
 
         
     def update(self):
@@ -515,17 +619,25 @@ class Cell:
         self.currentstate["DV_Time"] += self.deltatime
         
 
-    def incrementCurrent(self, crate):
-        self.currentstate["PV_CHAN_Current"] = crate*self.nominalCapacity
-        self.currentCapacity += -crate*self.nominalCapacity*self.deltatime/3600
+    def incrementCurrent(self, crate = 'null', current = 'null'):
+        if current != 'null':
+            # print('')
+            # print(current)
+            # print(self.nominalCapacity)
+            self.crate = current/self.nominalCapacity
+            # print(self.crate)
+        else:
+            self.crate = crate
+        self.currentstate["PV_CHAN_Current"] = self.crate*self.nominalCapacity
+        self.currentCapacity += -self.crate*self.nominalCapacity*self.deltatime/3600
         self.currentstate["Current_Capacity"] = self.currentCapacity
-        self.updateSOCdistribution(crate)
+        self.updateSOCdistribution(self.crate)
         self.currentstate["Surface_Capacity"] = self.SOCdistribution[0]
 
-        if crate< 0:
-            self.currentstate["PV_CHAN_Discharge_Capacity"] += -crate*self.nominalCapacity*self.deltatime/3600
-        elif crate> 0:
-            self.currentstate["PV_CHAN_Charge_Capacity"] += crate*self.nominalCapacity*self.deltatime/3600
+        if self.crate< 0:
+            self.currentstate["PV_CHAN_Discharge_Capacity"] += -self.crate*self.nominalCapacity*self.deltatime/3600
+        elif self.crate > 0:
+            self.currentstate["PV_CHAN_Charge_Capacity"] += self.crate*self.nominalCapacity*self.deltatime/3600
             
     def updateInternalResistance(self):
         self.currentstate["Internal_Resistance"] = (1 - self.currentCapacity/self.nominalCapacity)*10 + np.random.random()*5
@@ -540,6 +652,7 @@ class Cell:
         self.tempSOCdistribution[-1] = self.SOCdistribution[-1] +  (self.SOCdistribution[-2]-self.SOCdistribution[-1])*distributionFactor
         
         self.SOCdistribution = self.tempSOCdistribution
+        self.currentstate["Capacity_Profile"] = self.SOCdistribution
         
 #    def updateSOCdistribution(self, crate):
 #        distributionFactor = self.deltatime/10
@@ -616,53 +729,53 @@ class Cell:
 
 
 
-#def run():
-#    schedule = Schedule()
-#    schedule.openSchedule(schedule_filename)
-#    schedule.buildSchedule()
-#    
-#    tester = Tester()
-#    tester.setSchedule(schedule_filename)
-#    tester.buildCell(0.001, 1.000, deltatime = deltaTime, cellType = cellType, SOClength = SOClength)
-#    tester.runTest()
-#    tester.prepareOutput()
-#    tester.plotOverview()
-#    tester.saveOverview(pathlib.Path("test_schedules/output") / (schedule_name[:-4] + ".png"))
+# def run():
+#     schedule = Schedule()
+#     schedule.openSchedule(schedule_filename)
+#     schedule.buildSchedule()
+    
+#     tester = Tester()
+#     tester.setSchedule(schedule_filename)
+#     tester.buildCell(0.001, 1.000, deltatime = deltaTime, cellType = cellType, SOClength = SOClength)
+#     tester.runTest()
+#     tester.prepareOutput()
+#     tester.plotOverview()
+#     tester.saveOverview(pathlib.Path("test_schedules/output") / (schedule_name[:-4] + ".png"))
 
-#
-#performance_run = False
-#
-#if performance_run:
-#    import cProfile
-#    import pstats
-#    
-#    pr = cProfile.Profile()
-#    pr.run('run()')
-#    pr.dump_stats('output.prof')
-#    
-#    log_path = pathlib.Path("test_schedules\logs")
-#    log_filename = schedule_path / "log_" + time.strftime('%Y%m%d-%H%M%S') + ".txt"
-#    stream = open(log_filename, 'w')
-#    ps = pstats.Stats('output.prof', stream=stream).sort_stats('cumulative')
-#    ps.print_stats()
-#    stream.close()
-#    
-#else:
-#    schedule = Schedule()
-#    schedule.openSchedule(schedule_filename)
-#    schedule.buildSchedule()
-#    
-#    tester = Tester()
-#    tester.setSchedule(schedule_filename)
-#    tester.buildCell(0.001, 1.000, deltatime = deltaTime, cellType = cellType, SOClength = SOClength)
-#    tester.runTest()
-#    tester.prepareOutput()
-#    tester.plotOverview()
-#    tester.saveOverview(pathlib.Path("test_schedules/output") / (schedule_name[:-4] + ".png"))
-#
-#
-#
-#
+
+# performance_run = False
+
+# if performance_run:
+#     import cProfile
+#     import pstats
+    
+#     pr = cProfile.Profile()
+#     pr.run('run()')
+#     pr.dump_stats('output.prof')
+    
+#     log_path = pathlib.Path("test_schedules\logs")
+#     log_filename = schedule_path / "log_" + time.strftime('%Y%m%d-%H%M%S') + ".txt"
+#     stream = open(log_filename, 'w')
+#     ps = pstats.Stats('output.prof', stream=stream).sort_stats('cumulative')
+#     ps.print_stats()
+#     stream.close()
+    
+# else:
+#     schedule = Schedule()
+#     schedule.openSchedule(schedule_filename)
+#     schedule.buildSchedule()
+    
+#     tester = Tester()
+#     tester.setSchedule(schedule_filename)
+#     tester.buildCell(0.001, 1.000, deltatime = deltaTime, cellType = cellType, SOClength = SOClength)
+#     tester.runTest()
+#     tester.prepareOutput()
+#     tester.plotOverview()
+#     tester.saveOverview(pathlib.Path("test_schedules/output") / (schedule_name[:-4] + ".png"))
+
+
+
+
 
 
 
